@@ -3,7 +3,7 @@ import {
   ShieldAlert, ShieldCheck, Cpu, Database, Network, Box, Lock, 
   Eye, Type, AppWindow, HardDrive, FileJson, AlertTriangle, 
   CheckCircle, PlusCircle, MinusCircle, Info, Maximize2, X,
-  ArrowRight, Shield
+  ArrowRight, Layers, Shield
 } from 'lucide-react';
 import { cn } from './App';
 
@@ -15,17 +15,17 @@ export default function Dashboard({ report, onReset }) {
   if (!report) return null;
 
   const {
-    verdict,
-    verdict_reason,
-    smoking_gun,
-    scores,
-    contributions,
-    delta,
-    security,
-    intelligence,
-    baseline_summary,
-    candidate_summary
-  } = report;
+    verdict = 'INSUFFICIENT EVIDENCE',
+    verdict_reason = '',
+    smoking_gun = '',
+    scores = { clone: null, brand: null, threat: 0 },
+    contributions = { clone: {}, brand: {}, threat: {} },
+    delta = { preserved: [], added: [], modified: [], removed: [] },
+    security = null,
+    intelligence = null,
+    baseline_summary = null,
+    candidate_summary = null
+  } = report || {};
 
   // Visuals for Verdict
   const isMalicious = verdict === 'TROJANIZED CLONE' || verdict === 'MALWARE' || verdict === 'THREAT_INJECTED';
@@ -53,6 +53,7 @@ export default function Dashboard({ report, onReset }) {
   };
 
   const ScoreCard = ({ title, score, type }) => {
+    const safeScore = score ?? 0;
     let colorClass = 'text-cyber-blue shadow-[0_0_15px_rgba(0,240,255,0.2)]';
     let ringColor = 'stroke-cyber-blue';
     if (type === 'threat') { colorClass = 'text-cyber-red shadow-[0_0_15px_rgba(255,42,42,0.2)]'; ringColor = 'stroke-cyber-red'; }
@@ -60,14 +61,14 @@ export default function Dashboard({ report, onReset }) {
 
     const radius = 35;
     const circumference = radius * 2 * Math.PI;
-    const strokeDashoffset = circumference - (score / 100) * circumference;
+    const strokeDashoffset = circumference - (safeScore / 100) * circumference;
 
     return (
       <div className={cn("glass-panel p-6 rounded-2xl flex items-center justify-between group hover:-translate-y-1 transition-transform cursor-default", colorClass)}>
         <div>
           <h3 className="text-gray-400 font-display uppercase tracking-wider text-xs font-bold mb-1">{title}</h3>
           <div className="flex items-baseline gap-1">
-            <span className={cn("text-5xl font-black font-display tracking-tight", colorClass.split(' ')[0])}>{Math.round(score)}</span>
+            <span className={cn("text-5xl font-black font-display tracking-tight", colorClass.split(' ')[0])}>{Math.round(safeScore)}</span>
             <span className="text-xl text-gray-500 font-bold">%</span>
           </div>
         </div>
@@ -115,10 +116,10 @@ export default function Dashboard({ report, onReset }) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <ScoreCard title="Clone Confidence" score={scores.clone} type="clone" />
-            <ScoreCard title="Brand Confidence" score={scores.brand} type="brand" />
-            <ScoreCard title="Threat Confidence" score={scores.threat} type="threat" />
-          </div>
+          <ScoreCard title="Clone Confidence" score={scores.clone ?? 0} type="clone" />
+          <ScoreCard title="Brand Confidence" score={scores.brand ?? 0} type="brand" />
+          <ScoreCard title="Threat Confidence" score={scores.threat ?? 0} type="threat" />
+        </div>
 
           {smoking_gun && (
             <div className="p-8 rounded-2xl bg-[url('/noise.png')] bg-cyber-red/10 border border-cyber-red shadow-[0_0_40px_rgba(255,42,42,0.2)]">
@@ -130,13 +131,13 @@ export default function Dashboard({ report, onReset }) {
             </div>
           )}
 
-          {security?.high_risk_additions?.length > 0 && (
-            <div className="glass-panel p-8 rounded-2xl border-l-4 border-l-cyber-red">
-               <h3 className="text-2xl font-black font-display text-cyber-red tracking-widest uppercase mb-4">Security Delta</h3>
-               <ul className="space-y-2">
-                 {security.high_risk_additions.map((item, i) => (
-                   <li key={i} className="font-mono text-gray-300 flex items-start gap-3"><PlusCircle className="w-5 h-5 text-cyber-red shrink-0" />{item}</li>
-                 ))}
+      {security?.findings?.length > 0 && (
+         <div className="glass-panel p-8 rounded-2xl border-l-4 border-l-cyber-red">
+            <h3 className="text-2xl font-black font-display text-cyber-red tracking-widest uppercase mb-4">Security Delta</h3>
+            <ul className="space-y-2">
+                {security.findings.map((item, i) => (
+                    <li key={i} className="font-mono text-gray-300 flex items-start gap-3"><PlusCircle className="w-5 h-5 text-cyber-red shrink-0" />{item.reason}</li>
+                  ))}
                </ul>
             </div>
           )}
@@ -174,27 +175,27 @@ export default function Dashboard({ report, onReset }) {
               {i === 0 ? 'B0' : 'CX'}
             </div>
             <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4 font-mono">{app.title} APK</h3>
-            <div className="space-y-4 relative z-10">
-              <div>
-                <div className="text-xs text-gray-500 mb-1 uppercase">Package Name</div>
-                <div className="font-mono text-white break-all">{app.data?.package_name || 'Unknown'}</div>
-              </div>
-              <div className="flex gap-8">
-                <div>
-                  <div className="text-xs text-gray-500 mb-1 uppercase">App Label</div>
-                  <div className="font-display font-bold text-gray-200">{app.data?.app_name || 'Unknown'}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-500 mb-1 uppercase">Version</div>
-                  <div className="font-mono text-gray-200">{app.data?.version_name || 'Unknown'}</div>
-                </div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-500 mb-1 uppercase">Primary Certificate SHA-256</div>
-                <div className="font-mono text-xs text-gray-400 break-all p-2 bg-black/40 rounded border border-white/5 selection:bg-cyber-blue/30">
-                  {app.data?.certificates?.[0]?.sha256 || 'Unsigned / Unavailable'}
-                </div>
-              </div>
+             <div className="space-y-4 relative z-10">
+               <div>
+                 <div className="text-xs text-gray-500 mb-1 uppercase">Package Name</div>
+                 <div className="font-mono text-white break-all">{app.data?.metadata?.package_name || app.data?.package_name || 'Unknown'}</div>
+               </div>
+               <div className="flex gap-8">
+                 <div>
+                   <div className="text-xs text-gray-500 mb-1 uppercase">App Label</div>
+                   <div className="font-display font-bold text-gray-200">{app.data?.metadata?.app_label || app.data?.app_name || app.data?.app_label || 'Unknown'}</div>
+                 </div>
+                 <div>
+                   <div className="text-xs text-gray-500 mb-1 uppercase">Version</div>
+                   <div className="font-mono text-gray-200">{app.data?.metadata?.version_name || app.data?.version_name || 'Unknown'}</div>
+                 </div>
+               </div>
+               <div>
+                 <div className="text-xs text-gray-500 mb-1 uppercase">Primary Certificate SHA-256</div>
+                 <div className="font-mono text-xs text-gray-400 break-all p-2 bg-black/40 rounded border border-white/5 selection:bg-cyber-blue/30">
+                   {app.data?.certificates?.[0]?.sha256 || 'Unsigned / Unavailable'}
+                 </div>
+               </div>
             </div>
           </div>
         ))}
@@ -251,9 +252,9 @@ export default function Dashboard({ report, onReset }) {
 
       {/* Scores Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <ScoreCard title="Clone Confidence" score={scores.clone} type="clone" />
-        <ScoreCard title="Brand Confidence" score={scores.brand} type="brand" />
-        <ScoreCard title="Threat Confidence" score={scores.threat} type="threat" />
+        <ScoreCard title="Clone Confidence" score={scores.clone ?? 0} type="clone" />
+        <ScoreCard title="Brand Confidence" score={scores.brand ?? 0} type="brand" />
+        <ScoreCard title="Threat Confidence" score={scores.threat ?? 0} type="threat" />
       </div>
 
       {/* Clone DNA Grid */}
@@ -291,7 +292,7 @@ export default function Dashboard({ report, onReset }) {
       </div>
 
       {/* Security Delta */}
-      {security?.high_risk_additions?.length > 0 && (
+      {security?.findings?.length > 0 && (
         <div>
           <h3 className="text-xl font-bold font-display text-white mb-6 uppercase tracking-wider flex items-center gap-3">
             <ShieldAlert className="w-5 h-5 text-cyber-red" />
@@ -300,15 +301,15 @@ export default function Dashboard({ report, onReset }) {
           <div className="glass-panel rounded-2xl overflow-hidden border border-cyber-red/20 shadow-[0_0_20px_rgba(255,42,42,0.1)]">
             <div className="p-4 bg-cyber-red/10 border-b border-cyber-red/20 text-cyber-red font-mono text-sm font-bold uppercase flex justify-between items-center">
               <span>High Risk Additions Detected</span>
-              <span className="px-2 py-0.5 rounded bg-cyber-red text-black">{security.high_risk_additions.length}</span>
+              <span className="px-2 py-0.5 rounded bg-cyber-red text-black">{security.findings.length}</span>
             </div>
             <div className="p-4 divide-y divide-white/5">
-              {security.high_risk_additions.map((item, i) => (
-                <div key={i} className="py-3 font-mono text-sm text-gray-300 flex items-start gap-3">
-                  <PlusCircle className="w-4 h-4 text-cyber-red shrink-0 mt-0.5" />
-                  <span className="break-all">{item}</span>
-                </div>
-              ))}
+               {security.findings.map((item, i) => (
+                 <div key={i} className="py-3 font-mono text-sm text-gray-300 flex items-start gap-3">
+                   <PlusCircle className="w-4 h-4 text-cyber-red shrink-0 mt-0.5" />
+                   <span className="break-all">{item.reason}</span>
+                 </div>
+               ))}
             </div>
           </div>
         </div>
@@ -372,17 +373,17 @@ export default function Dashboard({ report, onReset }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {Object.entries(contributions.clone.details).map(([key, val]) => (
+                {Object.entries(contributions.clone || {}).map(([key, val]) => (
                   <tr key={key} className="hover:bg-white/5 transition-colors">
                     <td className="py-3 pr-4 font-bold text-gray-400 capitalize">{key.replace(/_/g, ' ')}</td>
-                    <td className="py-3 px-4 text-right">{val.raw ? `${Math.round(val.raw * 100)}%` : 'N/A'}</td>
-                    <td className="py-3 px-4 text-right">{Math.round(val.weight * 100)}%</td>
-                    <td className="py-3 pl-4 text-right font-black text-cyber-blue">+{val.points.toFixed(1)} pts</td>
+                    <td className="py-3 px-4 text-right">N/A</td>
+                    <td className="py-3 px-4 text-right">—</td>
+                    <td className="py-3 pl-4 text-right font-black text-cyber-blue">+{Number(val).toFixed(1)} pts</td>
                   </tr>
                 ))}
                 <tr className="border-t-2 border-white/20">
                   <td colSpan={3} className="py-4 text-right font-display font-bold uppercase tracking-widest text-white">Total Clone Confidence</td>
-                  <td className="py-4 text-right font-black text-2xl text-cyber-blue">{scores.clone.toFixed(1)}%</td>
+                  <td className="py-4 text-right font-black text-2xl text-cyber-blue">{(scores.clone ?? 0).toFixed(1)}%</td>
                 </tr>
               </tbody>
             </table>
@@ -399,14 +400,17 @@ function DeltaList({ data, type }) {
   const items = [];
   
   const extractItems = (category, icon, label) => {
-    if (data[category] && data[category][type]) {
-      data[category][type].forEach(evidence => {
-        items.push({ 
-          icon, 
-          label, 
-          value: evidence.id || String(evidence.value)
+    if (data[category]) {
+      const cat = data[category][type];
+      if (cat && Array.isArray(cat)) {
+        cat.forEach(evidence => {
+          items.push({ 
+            icon, 
+            label, 
+            value: evidence.signal || String(evidence.candidate_value ?? evidence.baseline_value ?? '')
+          });
         });
-      });
+      }
     }
   };
 

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import Dashboard from './Dashboard';
+import { ErrorBoundary } from './ErrorBoundary';
 import { Activity, LayoutDashboard, Shield, ShieldAlert, Cpu, Network, Menu, X, Download, Terminal, UploadCloud, Layers, Info } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -34,7 +37,7 @@ function UploadView({ onAnalysisComplete }) {
       setTimeout(() => setLoadingStage('SCANNING FOR SECURITY CAPABILITIES...'), 5500);
       setTimeout(() => setLoadingStage('FUSING FORENSIC EVIDENCE...'), 7500);
 
-      const response = await fetch('http://localhost:8000/api/v1/analyze', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/analyze`, {
         method: 'POST',
         body: formData,
       });
@@ -224,7 +227,7 @@ function BenchmarkView() {
   const [data, setData] = React.useState(null);
   
   React.useEffect(() => {
-    fetch('http://localhost:8000/api/v1/benchmark')
+    fetch(`${API_BASE_URL}/api/v1/benchmark`)
       .then(res => res.json())
       .then(d => setData(d))
       .catch(e => console.error(e));
@@ -405,7 +408,9 @@ function App() {
         <div className="flex-1 overflow-y-auto">
           {view === 'ANALYSIS' && (
             reportData ? (
-              <Dashboard report={reportData} onReset={() => setReportData(null)} />
+              <ErrorBoundary>
+                <Dashboard report={reportData} onReset={() => setReportData(null)} />
+              </ErrorBoundary>
             ) : (
               <UploadView onAnalysisComplete={setReportData} />
             )

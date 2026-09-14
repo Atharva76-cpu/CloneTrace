@@ -106,8 +106,8 @@ async def compare_apks(baseline: UploadFile = File(...), candidate: UploadFile =
                 "Icon similarity uses perceptual hashing which is vulnerable to rotation/scaling.",
                 "String extraction is currently limited to DEX string pools."
             ],
-            "baseline_summary": b_results['identity']['metadata'],
-            "candidate_summary": c_results['identity']['metadata']
+            "baseline_summary": b_results['identity'],
+            "candidate_summary": c_results['identity']
         }
         
     except Exception as e:
