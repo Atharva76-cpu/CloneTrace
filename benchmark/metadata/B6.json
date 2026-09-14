@@ -1,0 +1,14 @@
+{
+  "variant": "B6",
+  "base": "B0",
+  "expected_relationship": "CLONE",
+  "expected_transformations": [
+    "icon_mod"
+  ],
+  "expected_security_delta": false,
+  "source_sha256": "e0b2dd89f6b22f10af810abc8249f229d40f454f80cc78d524b6425cc4980a40",
+  "output_sha256": "d26aec953fc5df89617ee335e5d1724bfb67d794a4c23cd11df142979af3b391",
+  "timestamp": "2026-09-14T12:35:26.468577",
+  "generated": true,
+  "reason": ""
+}

@@ -1,0 +1,15 @@
+{
+  "variant": "B3",
+  "base": "B0",
+  "expected_relationship": "CLONE",
+  "expected_transformations": [
+    "package_rename",
+    "resign"
+  ],
+  "expected_security_delta": false,
+  "source_sha256": "e0b2dd89f6b22f10af810abc8249f229d40f454f80cc78d524b6425cc4980a40",
+  "output_sha256": "51d1931004a491e2cb2ea7b27f81b8cdbc0dcf49a6827fb319c720fb680f1a9f",
+  "timestamp": "2026-09-14T12:33:19.954333",
+  "generated": true,
+  "reason": ""
+}

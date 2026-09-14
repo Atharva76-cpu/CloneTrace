@@ -1,0 +1,18 @@
+{
+  "variant": "B10",
+  "base": "B0",
+  "expected_relationship": "CLONE",
+  "expected_transformations": [
+    "package_rename",
+    "string_mod",
+    "sms_capability_added",
+    "accessibility_capability_added",
+    "endpoint_added"
+  ],
+  "expected_security_delta": true,
+  "source_sha256": "e0b2dd89f6b22f10af810abc8249f229d40f454f80cc78d524b6425cc4980a40",
+  "output_sha256": "2be5c72c584642e4b89ecc3f17fbb200a1b9cfe6e3eecb60e0c21f4832ffd105",
+  "timestamp": "2026-09-14T12:38:10.994733",
+  "generated": true,
+  "reason": ""
+}

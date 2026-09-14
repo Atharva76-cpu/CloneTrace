@@ -1,0 +1,12 @@
+{
+  "variant": "B0",
+  "base": "B0",
+  "expected_relationship": "ORIGINAL",
+  "expected_transformations": [],
+  "expected_security_delta": false,
+  "source_sha256": "e0b2dd89f6b22f10af810abc8249f229d40f454f80cc78d524b6425cc4980a40",
+  "output_sha256": "e0b2dd89f6b22f10af810abc8249f229d40f454f80cc78d524b6425cc4980a40",
+  "timestamp": "2026-09-14T12:31:14.567116",
+  "generated": true,
+  "reason": ""
+}

@@ -1,0 +1,14 @@
+{
+  "variant": "B8",
+  "base": "B0",
+  "expected_relationship": "CLONE",
+  "expected_transformations": [
+    "accessibility_capability_added"
+  ],
+  "expected_security_delta": true,
+  "source_sha256": "e0b2dd89f6b22f10af810abc8249f229d40f454f80cc78d524b6425cc4980a40",
+  "output_sha256": "e84e79071ee669b16e6dd761577589372ddca38ffd4cf5e9186a88b9ae3cf0c2",
+  "timestamp": "2026-09-14T12:36:49.128864",
+  "generated": true,
+  "reason": ""
+}

@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+androguard
+cryptography
+ImageHash
+Pillow
+pydantic
+python-multipart

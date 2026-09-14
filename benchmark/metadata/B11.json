@@ -1,0 +1,14 @@
+{
+  "variant": "B11",
+  "base": "B0",
+  "expected_relationship": "UNRELATED",
+  "expected_transformations": [
+    "unrelated_apk"
+  ],
+  "expected_security_delta": "unknown",
+  "source_sha256": "e0b2dd89f6b22f10af810abc8249f229d40f454f80cc78d524b6425cc4980a40",
+  "output_sha256": "68f2a7694d9dfbcafd4b54d2e0b8f549a1078e1c4bfda36971ccad9177428572",
+  "timestamp": "2026-09-14T12:31:14.587567",
+  "generated": true,
+  "reason": ""
+}

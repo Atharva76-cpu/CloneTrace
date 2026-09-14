@@ -1,0 +1,84 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Vite
+.vite/
+frontend/dist/
+frontend/dist-ssr/
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs & Temp Files
+*.log
+tmp/
+temp/
+coverage/
+.nyc_output/
+.pytest_cache/
+.tox/
+
+# Project Specific
+backend/reports/
+B*_raw.json
+results.json
+*.apk
+*.zip
+*.keystore
+*.jks
+
+# Un-ignore test.keystore for reproducibility
+
+
+# Ignore apktool junk
+benchmark/scripts/*_dir/
+benchmark/scripts/*_dir/*
+benchmark/scripts/unpacked/
+benchmark/scripts/apktool.jar
+
+# Let's track benchmark generator scripts, but ignore the output APKs and intermediates
+benchmark/original/*.apk
+benchmark/variants/*.apk
+benchmark/results.json

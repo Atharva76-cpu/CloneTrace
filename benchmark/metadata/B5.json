@@ -1,0 +1,14 @@
+{
+  "variant": "B5",
+  "base": "B0",
+  "expected_relationship": "CLONE",
+  "expected_transformations": [
+    "string_mod"
+  ],
+  "expected_security_delta": false,
+  "source_sha256": "e0b2dd89f6b22f10af810abc8249f229d40f454f80cc78d524b6425cc4980a40",
+  "output_sha256": "873d31529724dde695bd363bd81e0ba2a8150918a1bfa37bda8b7b0df3422f33",
+  "timestamp": "2026-09-14T12:34:48.010280",
+  "generated": true,
+  "reason": ""
+}

@@ -1,0 +1,14 @@
+{
+  "variant": "B9",
+  "base": "B0",
+  "expected_relationship": "CLONE",
+  "expected_transformations": [
+    "endpoint_added"
+  ],
+  "expected_security_delta": true,
+  "source_sha256": "e0b2dd89f6b22f10af810abc8249f229d40f454f80cc78d524b6425cc4980a40",
+  "output_sha256": "a1ddf42681d6827870b6b22f844d7c1ba307146aba7c21db1ed0219535982f83",
+  "timestamp": "2026-09-14T12:37:26.051157",
+  "generated": true,
+  "reason": ""
+}
