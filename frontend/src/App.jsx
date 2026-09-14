@@ -5,7 +5,8 @@ import { Activity, LayoutDashboard, Shield, ShieldAlert, Cpu, Network, Menu, X, 
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || process.env.VITE_API_URL || 'http://localhost:8000';
+console.log('[CloneTrace] API_BASE_URL:', API_BASE_URL);
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
