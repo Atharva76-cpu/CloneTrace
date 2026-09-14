@@ -1,9 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-[#030509] text-gray-200 antialiased overflow-x-hidden;
+    font-family: 'Inter', sans-serif;
   }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)];
+  }
+  
+  .glass-panel-hover {
+    @apply hover:bg-white/[0.05] hover:border-cyber-blue/40 transition-all duration-300;
+  }
+
+  .text-glow-blue {
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+  }
+  
+  .text-glow-red {
+    text-shadow: 0 0 10px rgba(255, 42, 42, 0.7);
+  }
+
+  /* 3D Depth Utilities */
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .translate-z-10 {
+    transform: translateZ(10px);
+  }
+  .translate-z-20 {
+    transform: translateZ(20px);
+  }
+  
+  .hover-tilt:hover {
+    transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateZ(10px);
+  }
+}
+
+/* Background Cyber Grid */
+.cyber-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%);
+}
+
+/* Ambient glows */
+.ambient-glow-blue {
+  background: radial-gradient(circle at top right, rgba(0, 240, 255, 0.15), transparent 40%);
+}
+.ambient-glow-purple {
+  background: radial-gradient(circle at bottom left, rgba(176, 38, 255, 0.15), transparent 40%);
+}
+.ambient-glow-red {
+  background: radial-gradient(circle at top left, rgba(255, 42, 42, 0.15), transparent 40%);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-black/50;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-white/20 rounded-full hover:bg-white/30 transition-colors;
 }
