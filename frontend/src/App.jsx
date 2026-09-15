@@ -394,7 +394,7 @@ function App() {
           </div>
           
           <div className="flex items-center gap-4">
-            <a href="https://github.com/Krishn0x/CloneTrace" target="_blank" rel="noreferrer" className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-sm font-bold">
+            <a href="https://github.com/Atharva76-cpu" target="_blank" rel="noreferrer" className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-sm font-bold">
               GitHub
             </a>
             {reportData && view === 'ANALYSIS' && (
