@@ -79,6 +79,16 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+### Running CloneTrace
+1. Ensure both backend (`:8000`) and frontend (`:5173`) are running
+2. Open the UI in your browser
+3. Click **"UPLOAD BASELINE APK"** → select the original/reference APK
+4. Click **"UPLOAD CANDIDATE APK"** → select the APK to analyze
+5. Click **"ANALYZE EVIDENCE"**
+6. Review the forensic verdict dashboard
+7. (Optional) Click **"Enter Judge Mode"** for full-screen report
+8. (Optional) Click **"Export JSON"** to download the forensic report
+
 ### One-Command Deploy (Docker)
 ```bash
 docker-compose up --build
