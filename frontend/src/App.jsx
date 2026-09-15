@@ -80,8 +80,11 @@ function UploadView({ onAnalysisComplete }) {
           type="file" 
           accept=".apk" 
           className="hidden" 
-          onChange={(e) => setFile(e.target.files[0])} 
+          onChange={(e) => setFile(e.target.files[0])}
         />
+        {!file && (
+          <p className="text-xs text-gray-500 mt-2">Max 10MB per APK • Required for memory safety on shared hosting</p>
+        )}
         
         {file ? (
           <div className="flex flex-col items-center z-10">
