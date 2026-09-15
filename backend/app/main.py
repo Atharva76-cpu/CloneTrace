@@ -1,9 +1,12 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import tempfile
 import os
 import uuid
 import gc
+import traceback
+import logging
 import datetime
 from typing import Dict, Any
 
@@ -20,6 +23,9 @@ from app.models.delta import Delta
 
 from androguard.core.apk import APK
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 MAX_APK_SIZE = 10 * 1024 * 1024  # 10MB per APK
 
 app = FastAPI(title="CloneTrace Forensic Engine")
@@ -31,6 +37,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled exception: {traceback.format_exc()}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc), "error": type(exc).__name__},
+    )
 
 def analyze_apk(file_path: str) -> Dict[str, Any]:
     apk = APK(file_path)
@@ -55,46 +69,56 @@ def analyze_apk(file_path: str) -> Dict[str, Any]:
 
 @app.post("/api/v1/analyze")
 async def compare_apks(baseline: UploadFile = File(...), candidate: UploadFile = File(...)):
-    # Validate file sizes
-    b_size = await baseline.seek(0, 2)
-    await baseline.seek(0)
-    c_size = await candidate.seek(0, 2)
-    await candidate.seek(0)
-
-    if b_size > MAX_APK_SIZE or c_size > MAX_APK_SIZE:
-        raise HTTPException(
-            status_code=413,
-            detail=f"APK files must be under {MAX_APK_SIZE // (1024*1024)}MB. "
-                   f"Got {b_size // (1024*1024)}MB and {c_size // (1024*1024)}MB."
-        )
-
-    b_path = os.path.join(tempfile.gettempdir(), f"baseline_{uuid.uuid4()}.apk")
-    c_path = os.path.join(tempfile.gettempdir(), f"candidate_{uuid.uuid4()}.apk")
+    b_path = None
+    c_path = None
     
     try:
+        # Validate file sizes
+        b_size = await baseline.seek(0, 2)
+        await baseline.seek(0)
+        c_size = await candidate.seek(0, 2)
+        await candidate.seek(0)
+
+        if b_size > MAX_APK_SIZE or c_size > MAX_APK_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail=f"APK files must be under {MAX_APK_SIZE // (1024*1024)}MB. "
+                       f"Got {b_size // (1024*1024)}MB and {c_size // (1024*1024)}MB."
+            )
+
+        b_path = os.path.join(tempfile.gettempdir(), f"baseline_{uuid.uuid4()}.apk")
+        c_path = os.path.join(tempfile.gettempdir(), f"candidate_{uuid.uuid4()}.apk")
+        
+        logger.info(f"Writing baseline APK ({b_size} bytes) to {b_path}")
         with open(b_path, "wb") as b_out:
             b_out.write(await baseline.read())
-            
+
+        logger.info(f"Writing candidate APK ({c_size} bytes) to {c_path}")
         with open(c_path, "wb") as c_out:
             c_out.write(await candidate.read())
 
         # Analyze baseline
+        logger.info("Analyzing baseline APK...")
         b_results = analyze_apk(b_path)
-        del b_path  # Free file path reference early
         gc.collect()
 
         # Analyze candidate
+        logger.info("Analyzing candidate APK...")
         c_results = analyze_apk(c_path)
         gc.collect()
         
         # Compare
+        logger.info("Comparing APKs...")
         comparator = Comparator(b_results, c_results)
         delta = comparator.generate_delta()
         
         # Score
+        logger.info("Scoring...")
         scorer = Scorer(delta)
         scorer.compute()
         score_results = scorer.get_results()
+        
+        logger.info(f"Verdict: {score_results['verdict']}")
         
         # Security Analysis
         from app.engine.security import SecurityAnalyzer
@@ -129,13 +153,21 @@ async def compare_apks(baseline: UploadFile = File(...), candidate: UploadFile =
             "candidate_summary": c_results['identity']
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error in compare_apks: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"{type(e).__name__}: {str(e)}"
+        )
     finally:
-        if os.path.exists(b_path):
-            os.remove(b_path)
-        if os.path.exists(c_path):
-            os.remove(c_path)
+        for p in [b_path, c_path]:
+            if p and os.path.exists(p):
+                try:
+                    os.remove(p)
+                except:
+                    pass
         gc.collect()
 
 @app.get("/api/v1/benchmark")
