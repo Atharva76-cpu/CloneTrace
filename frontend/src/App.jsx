@@ -24,6 +24,13 @@ function UploadView({ onAnalysisComplete }) {
 
   const handleAnalyze = async () => {
     if (!baselineFile || !candidateFile) return;
+
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (baselineFile.size > MAX_SIZE || candidateFile.size > MAX_SIZE) {
+      setError(`APK files must be under 10MB. Got ${(baselineFile.size / 1024 / 1024).toFixed(1)}MB and ${(candidateFile.size / 1024 / 1024).toFixed(1)}MB.`);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setLoadingStage('INGESTING APK FILES...');
@@ -44,7 +51,8 @@ function UploadView({ onAnalysisComplete }) {
       });
       
       if (!response.ok) {
-        throw new Error(`Analysis failed: ${response.statusText}`);
+        const errorText = await response.text().catch(() => response.statusText);
+        throw new Error(`Analysis failed (${response.status}): ${errorText || response.statusText}`);
       }
       
       const data = await response.json();

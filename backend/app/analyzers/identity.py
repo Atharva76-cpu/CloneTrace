@@ -4,9 +4,9 @@ from typing import Dict, Any, List
 from androguard.core.apk import APK
 
 class IdentityAnalyzer:
-    def __init__(self, apk_path: str):
+    def __init__(self, apk: APK, apk_path: str):
+        self.apk = apk
         self.apk_path = apk_path
-        self.apk = APK(apk_path)
         
     def get_file_sha256(self) -> str:
         sha256_hash = hashlib.sha256()

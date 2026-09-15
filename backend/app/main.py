@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import tempfile
 import os
 import uuid
+import gc
+import datetime
 from typing import Dict, Any
 
 from app.analyzers.identity import IdentityAnalyzer
@@ -18,6 +20,8 @@ from app.models.delta import Delta
 
 from androguard.core.apk import APK
 
+MAX_APK_SIZE = 10 * 1024 * 1024  # 10MB per APK
+
 app = FastAPI(title="CloneTrace Forensic Engine")
 
 app.add_middleware(
@@ -31,7 +35,7 @@ app.add_middleware(
 def analyze_apk(file_path: str) -> Dict[str, Any]:
     apk = APK(file_path)
     
-    identity_analyzer = IdentityAnalyzer(file_path)
+    identity_analyzer = IdentityAnalyzer(apk, file_path)
     manifest_analyzer = ManifestAnalyzer(apk)
     structural_analyzer = StructuralAnalyzer(apk)
     visual_analyzer = VisualAnalyzer(apk)
@@ -51,7 +55,19 @@ def analyze_apk(file_path: str) -> Dict[str, Any]:
 
 @app.post("/api/v1/analyze")
 async def compare_apks(baseline: UploadFile = File(...), candidate: UploadFile = File(...)):
-    # Save uploaded files temporarily
+    # Validate file sizes
+    b_size = await baseline.seek(0, 2)
+    await baseline.seek(0)
+    c_size = await candidate.seek(0, 2)
+    await candidate.seek(0)
+
+    if b_size > MAX_APK_SIZE or c_size > MAX_APK_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"APK files must be under {MAX_APK_SIZE // (1024*1024)}MB. "
+                   f"Got {b_size // (1024*1024)}MB and {c_size // (1024*1024)}MB."
+        )
+
     b_path = os.path.join(tempfile.gettempdir(), f"baseline_{uuid.uuid4()}.apk")
     c_path = os.path.join(tempfile.gettempdir(), f"candidate_{uuid.uuid4()}.apk")
     
@@ -61,11 +77,15 @@ async def compare_apks(baseline: UploadFile = File(...), candidate: UploadFile =
             
         with open(c_path, "wb") as c_out:
             c_out.write(await candidate.read())
-            
+
         # Analyze baseline
         b_results = analyze_apk(b_path)
+        del b_path  # Free file path reference early
+        gc.collect()
+
         # Analyze candidate
         c_results = analyze_apk(c_path)
+        gc.collect()
         
         # Compare
         comparator = Comparator(b_results, c_results)
@@ -85,7 +105,6 @@ async def compare_apks(baseline: UploadFile = File(...), candidate: UploadFile =
         from app.engine.intelligence import IntelligenceEngine
         intel_engine = IntelligenceEngine(delta, score_results["scores"])
         
-        import datetime
         return {
             "timestamp": datetime.datetime.now().isoformat(),
             "status": "success",
@@ -113,11 +132,11 @@ async def compare_apks(baseline: UploadFile = File(...), candidate: UploadFile =
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        # Cleanup
         if os.path.exists(b_path):
             os.remove(b_path)
         if os.path.exists(c_path):
             os.remove(c_path)
+        gc.collect()
 
 @app.get("/api/v1/benchmark")
 def run_benchmark():
