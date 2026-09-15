@@ -4,12 +4,12 @@ from app.models.delta import Delta
 class IntelligenceEngine:
     def __init__(self, delta: Delta, scores: Dict[str, int]):
         self.delta = delta
-        self.scores = scores
+        self.scores = scores if isinstance(scores, dict) else {}
         
     def get_signal_disagreements(self) -> List[Dict[str, str]]:
         disagreements = []
-        c = self.scores.get("clone", 0)
-        b = self.scores.get("brand", 0)
+        c = self.scores.get("clone") or 0
+        b = self.scores.get("brand") or 0
         
         has_cert_preserved = any(e.signal == "certificate" for e in self.delta.identity.preserved)
         has_pkg_preserved = any(e.signal == "package_name" for e in self.delta.identity.preserved)
