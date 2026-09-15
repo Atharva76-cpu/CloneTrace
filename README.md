@@ -167,6 +167,3 @@ APK analysis should be performed on **authorized, controlled samples** in an iso
 ## License
 
 Currently, this repository has no explicit license. All rights reserved.
-
----
-*A project by [Atharva](https://github.com/Atharva76-cpu)*
