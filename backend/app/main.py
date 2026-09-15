@@ -73,29 +73,26 @@ async def compare_apks(baseline: UploadFile = File(...), candidate: UploadFile =
     c_path = None
     
     try:
-        # Validate file sizes
-        b_size = await baseline.seek(0, 2)
-        await baseline.seek(0)
-        c_size = await candidate.seek(0, 2)
-        await candidate.seek(0)
+        b_content = await baseline.read()
+        c_content = await candidate.read()
 
-        if b_size > MAX_APK_SIZE or c_size > MAX_APK_SIZE:
+        if len(b_content) > MAX_APK_SIZE or len(c_content) > MAX_APK_SIZE:
             raise HTTPException(
                 status_code=413,
                 detail=f"APK files must be under {MAX_APK_SIZE // (1024*1024)}MB. "
-                       f"Got {b_size // (1024*1024)}MB and {c_size // (1024*1024)}MB."
+                       f"Got {len(b_content) // (1024*1024)}MB and {len(c_content) // (1024*1024)}MB."
             )
 
         b_path = os.path.join(tempfile.gettempdir(), f"baseline_{uuid.uuid4()}.apk")
         c_path = os.path.join(tempfile.gettempdir(), f"candidate_{uuid.uuid4()}.apk")
         
-        logger.info(f"Writing baseline APK ({b_size} bytes) to {b_path}")
+        logger.info(f"Writing baseline APK ({len(b_content)} bytes) to {b_path}")
         with open(b_path, "wb") as b_out:
-            b_out.write(await baseline.read())
+            b_out.write(b_content)
 
-        logger.info(f"Writing candidate APK ({c_size} bytes) to {c_path}")
+        logger.info(f"Writing candidate APK ({len(c_content)} bytes) to {c_path}")
         with open(c_path, "wb") as c_out:
-            c_out.write(await candidate.read())
+            c_out.write(c_content)
 
         # Analyze baseline
         logger.info("Analyzing baseline APK...")
